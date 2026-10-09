@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +34,8 @@ fun CityListScreen(
     cities: List<City>,
     onAddCity: (City) -> Unit,
     onUpdateCity: (City, City) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDeleteCity: (City) -> Unit = {}
 ) {
     var newCityName by remember { mutableStateOf("") }
     var newProvinceName by remember { mutableStateOf("") }
@@ -105,53 +108,80 @@ fun CityListScreen(
             }
         }
         if (selectedCity != null) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                OutlinedTextField(
-                    value = editedCityName,
-                    onValueChange = { editedCityName = it },
-                    label = { Text("Updated City") },
-                    modifier = Modifier.weight(1f)
-                )
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = editedCityName,
+                        onValueChange = { editedCityName = it },
+                        label = { Text("Updated City") },
+                        modifier = Modifier.weight(1f)
+                    )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
-                OutlinedTextField(
-                    value = editedProvinceName,
-                    onValueChange = { editedProvinceName = it },
-                    label = { Text("Updated Province") },
-                    modifier = Modifier.weight(1f)
-                )
+                    OutlinedTextField(
+                        value = editedProvinceName,
+                        onValueChange = { editedProvinceName = it },
+                        label = { Text("Updated Province") },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
 
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Button(
-                    modifier = Modifier.padding(vertical = 12.dp),
-                    onClick = {
-                        val cityToUpdate = selectedCity
-                        if (
-                            cityToUpdate != null &&
-                            editedCityName.isNotBlank() &&
-                            editedProvinceName.isNotBlank()
-                        ) {
-                            onUpdateCity(
-                                cityToUpdate,
-                                City(
-                                    name = editedCityName,
-                                    province = editedProvinceName
-                                )
-                            )
-
-                            selectedCity = null
-                            editedCityName = ""
-                            editedProvinceName = ""
-                        }
-                    }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("UPDATE CITY")
+                    Button(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 4.dp),
+                        onClick = {
+                            val cityToUpdate = selectedCity
+                            if (
+                                cityToUpdate != null &&
+                                editedCityName.isNotBlank() &&
+                                editedProvinceName.isNotBlank()
+                            ) {
+                                onUpdateCity(
+                                    cityToUpdate,
+                                    City(
+                                        name = editedCityName,
+                                        province = editedProvinceName
+                                    )
+                                )
+
+                                selectedCity = null
+                                editedCityName = ""
+                                editedProvinceName = ""
+                            }
+                        }
+                    ) {
+                        Text("UPDATE CITY")
+                    }
+
+                    Button(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 4.dp),
+                        onClick = {
+                            val cityToDelete = selectedCity
+                            if (cityToDelete != null) {
+                                onDeleteCity(cityToDelete)
+                                selectedCity = null
+                                editedCityName = ""
+                                editedProvinceName = ""
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("DELETE CITY")
+                    }
                 }
             }
         }
@@ -213,7 +243,8 @@ fun CityListScreenPreview() {
                 City("Calgary", "AB")
             ),
             onAddCity = {},
-            onUpdateCity = { _, _ -> }
+            onUpdateCity = { _, _ -> },
+            onDeleteCity = {}
         )
     }
 }
